@@ -1,453 +1,118 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Astra AI — твой персональный агент</title>
+<title>Умный бот</title>
 <style>
-:root {
-  --bg:#0b1020;
-  --panel:#121b30;
-  --border:#293653;
-  --text:#edf3ff;
-  --muted:#9baac7;
-  --accent:#8b7cff;
-  --cyan:#51d6c5;
-}
-* { box-sizing:border-box; }
-body {
-  margin:0;
-  font-family:system-ui,Arial,sans-serif;
-  background:radial-gradient(ellipse at top,#25265a,var(--bg) 55%);
-  color:var(--text);
-  min-height:100vh;
-}
-button,input,textarea,select { font:inherit; }
-button { cursor:pointer; }
-.app {
-  display:grid;
-  grid-template-columns:260px 1fr;
-  min-height:100vh;
-  max-width:1500px;
-  margin:auto;
-}
-aside {
-  background:#0b1223;
-  border-right:1px solid var(--border);
-  padding:20px 15px;
-  display:flex;
-  flex-direction:column;
-  gap:20px;
-}
-.brand { display:flex;align-items:center;gap:12px; }
-.logo {
-  width:43px;height:43px;border-radius:14px;
-  display:grid;place-items:center;
-  background:linear-gradient(135deg,var(--accent),var(--cyan));
-  color:#071222;font-weight:900;font-size:22px;
-}
-.brand small { display:block;color:var(--muted);font-size:12px; }
-.newchat,.send {
-  border:0;border-radius:12px;padding:12px;
-  background:linear-gradient(110deg,var(--accent),#5c9eff);
-  color:white;font-weight:700;
-}
-.section-title {
-  font-size:11px;letter-spacing:1px;
-  color:#8190af;margin-bottom:8px;
-}
-.nav { display:grid;gap:5px; }
-.nav button,.history button {
-  background:transparent;border:0;color:#d5def2;
-  text-align:left;padding:11px;border-radius:10px;
-}
-.nav button:hover,.history button:hover { background:#1b2742; }
-.profile {
-  margin-top:auto;padding:13px;
-  background:var(--panel);border:1px solid var(--border);
-  border-radius:14px;
-}
-.profile label {
-  display:block;color:var(--muted);
-  font-size:12px;margin:12px 0 5px;
-}
-.profile select {
-  width:100%;padding:9px;border-radius:9px;
-  background:var(--bg);color:var(--text);
-  border:1px solid var(--border);
-}
-.profile p { font-size:12px;color:var(--muted); }
-main { display:flex;flex-direction:column;min-width:0;min-height:100vh; }
-header {
-  height:68px;padding:0 22px;
-  border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;
-}
-.status { color:var(--muted);font-size:12px; }
-.content {
-  width:min(820px,100%);margin:auto;
-  padding:25px 20px;flex:1;
-}
-.welcome { text-align:center;padding:35px 0 20px; }
-.orb {
-  width:70px;height:70px;margin:0 auto 18px;
-  border-radius:24px;display:grid;place-items:center;
-  font-size:32px;font-weight:bold;color:#081322;
-  background:linear-gradient(135deg,var(--accent),var(--cyan));
-  box-shadow:0 0 50px #8b7cff33;
-}
-h1 { font-size:clamp(27px,5vw,40px);margin:0 0 12px; }
-.gradient {
-  background:linear-gradient(90deg,#b1a6ff,#63e5d2);
-  color:transparent;background-clip:text;
-}
-.welcome p { color:var(--muted); }
-.quick {
-  display:grid;grid-template-columns:repeat(2,1fr);
-  gap:10px;margin:25px 0;
-}
-.quick button {
-  text-align:left;padding:15px;color:var(--text);
-  border:1px solid var(--border);border-radius:14px;
-  background:#121b30;
-}
-.quick button:hover { border-color:var(--accent); }
-.quick b { display:block;margin:5px 0; }
-.quick span { font-size:13px;color:var(--muted); }
-.messages { display:grid;gap:18px;padding-bottom:25px; }
-.message { display:flex;gap:10px;align-items:flex-start; }
-.message.user { flex-direction:row-reverse; }
-.avatar {
-  flex-shrink:0;width:34px;height:34px;
-  border-radius:11px;background:#252d4b;
-  display:grid;place-items:center;color:#c6bdff;
-}
-.user .avatar { background:#28505c;color:white; }
-.bubble {
-  max-width:85%;padding:13px 15px;
-  white-space:pre-wrap;overflow-wrap:anywhere;
-  background:var(--panel);border:1px solid var(--border);
-  border-radius:4px 15px 15px 15px;
-}
-.user .bubble {
-  background:#25264c;border-radius:15px 4px 15px 15px;
-}
-.meta { font-size:11px;color:var(--muted);margin-bottom:5px; }
-.composer-wrap {
-  position:sticky;bottom:0;padding:12px 18px 18px;
-  background:linear-gradient(transparent,var(--bg) 20%);
-}
-.composer {
-  width:min(820px,100%);margin:auto;
-  padding:10px;border:1px solid #384566;
-  border-radius:17px;background:var(--panel);
-}
-textarea {
-  width:100%;min-height:60px;max-height:180px;
-  resize:vertical;background:transparent;color:var(--text);
-  border:0;outline:0;padding:10px;
-}
-.composer-bottom {
-  display:flex;justify-content:space-between;
-  align-items:center;gap:10px;
-}
-.hint,.notice { color:#8291af;font-size:11px; }
-.notice { text-align:center;margin-top:10px; }
-.ghost {
-  border:1px solid var(--border);border-radius:9px;
-  background:var(--panel);color:var(--text);padding:8px 10px;
-}
-.mobile-menu { display:none; }
-@media(max-width:700px) {
-  .app { grid-template-columns:1fr; }
-  aside {
-    display:none;position:fixed;z-index:5;
-    inset:0 auto 0 0;width:270px;
-    box-shadow:15px 0 60px #0009;
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: system-ui, sans-serif;
+    background: linear-gradient(135deg, #1e1b4b, #312e81);
+    min-height: 100vh; display: flex; justify-content: center; align-items: center;
+    padding: 20px;
   }
-  .app.menu-open aside { display:flex; }
-  .mobile-menu { display:inline-block; }
-  header { padding:0 12px; }
-  .content { padding:18px 12px; }
-  .quick { gap:8px; }
-  .quick button { padding:11px; }
-  .composer-wrap { padding:10px; }
-}
+  .chat {
+    width: 100%; max-width: 480px; height: 640px;
+    background: #0f172a; border-radius: 16px;
+    display: flex; flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0,0,0,.5); overflow: hidden;
+  }
+  .header {
+    padding: 16px; background: #1e293b; color: #fff;
+    font-weight: 600; border-bottom: 1px solid #334155;
+  }
+  .header small { color: #94a3b8; font-weight: 400; font-size: 12px; display: block; margin-top: 2px; }
+  .messages {
+    flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px;
+  }
+  .msg {
+    max-width: 80%; padding: 10px 14px; border-radius: 14px; line-height: 1.4; font-size: 14px; color: #e2e8f0;
+    white-space: pre-wrap; word-wrap: break-word;
+  }
+  .user { align-self: flex-end; background: #6366f1; color: #fff; border-bottom-right-radius: 4px; }
+  .bot  { align-self: flex-start; background: #1e293b; border-bottom-left-radius: 4px; }
+  .input-row { display: flex; padding: 12px; gap: 8px; background: #1e293b; }
+  input {
+    flex: 1; padding: 10px 14px; border-radius: 10px; border: none; outline: none;
+    background: #0f172a; color: #e2e8f0; font-size: 14px;
+  }
+  button {
+    padding: 10px 16px; border: none; border-radius: 10px;
+    background: #6366f1; color: #fff; font-weight: 600; cursor: pointer;
+  }
+  button:disabled { opacity: .5; cursor: not-allowed; }
 </style>
 </head>
 <body>
-<div class="app" id="app">
-
-<aside>
-  <div class="brand">
-    <div class="logo">A</div>
-    <div><b>Astra AI</b><small>Твой персональный агент</small></div>
+<div class="chat">
+  <div class="header">Умный бот <small>powered by AI</small></div>
+  <div class="messages" id="messages">
+    <div class="msg bot">Привет! Чем могу помочь?</div>
   </div>
-
-  <button class="newchat" id="newChat">＋ Новый диалог</button>
-
-  <section>
-    <div class="section-title">ВОЗМОЖНОСТИ</div>
-    <div class="nav">
-      <button data-prompt="Объясни мне сложную тему простыми словами.">✦ Объяснить тему</button>
-      <button data-prompt="Помоги придумать идею для интересного проекта.">💡 Придумать идею</button>
-      <button data-prompt="Помоги написать программу или найти ошибку в коде.">⌘ Помощь с кодом</button>
-      <button data-prompt="Давай просто поговорим. Задай мне интересный вопрос.">☻ Поговорить</button>
-    </div>
-  </section>
-
-  <section>
-    <div class="section-title">ИСТОРИЯ ДИАЛОГА</div>
-    <div class="history" id="history">
-      <button>Новый диалог</button>
-    </div>
-  </section>
-
-  <div class="profile">
-    <b>⚙ Персонализация</b>
-    <label for="level">Как объяснять?</label>
-    <select id="level">
-      <option value="simple">Просто и понятно</option>
-      <option value="examples">Через примеры</option>
-      <option value="detailed">Подробно</option>
-      <option value="expert">Экспертно</option>
-    </select>
-
-    <label for="tone">Стиль общения</label>
-    <select id="tone">
-      <option value="friendly">Дружелюбный</option>
-      <option value="calm">Спокойный</option>
-      <option value="energetic">Энергичный</option>
-      <option value="concise">Краткий</option>
-    </select>
-    <p>Настройки определяют стиль демонстрационных ответов.</p>
+  <div class="input-row">
+    <input id="input" placeholder="Напиши сообщение..." autocomplete="off">
+    <button id="send">➤</button>
   </div>
-</aside>
-
-<main>
-  <header>
-    <div style="display:flex;align-items:center;gap:10px">
-      <button class="ghost mobile-menu" id="menuBtn">☰</button>
-      <div>
-        <b>Astra AI</b>
-        <div class="status">● Демо-режим · ИИ не подключён</div>
-      </div>
-    </div>
-    <button class="ghost" id="clearBtn">Очистить чат</button>
-  </header>
-
-  <section class="content">
-    <div class="welcome" id="welcome">
-      <div class="orb">✦</div>
-      <h1>Привет! Я <span class="gradient">Astra</span></h1>
-      <p>Твой помощник для учёбы, идей, программирования и разговоров.</p>
-      <p>Расскажи, что у тебя на уме — начнём разбираться вместе.</p>
-    </div>
-
-    <div class="quick" id="quick">
-      <button data-prompt="Объясни, как устроена чёрная дыра, простыми словами.">
-        <div>🌌</div><b>Объяснить сложную тему</b>
-        <span>Понятно и по шагам</span>
-      </button>
-      <button data-prompt="Придумай необычную идею для игры в браузере.">
-        <div>💡</div><b>Придумать идею</b>
-        <span>Проекты и изобретения</span>
-      </button>
-      <button data-prompt="Научи меня создавать игры на HTML, CSS и JavaScript.">
-        <div>💻</div><b>Создать проект</b>
-        <span>Код и помощь с ошибками</span>
-      </button>
-      <button data-prompt="Задай мне один интересный вопрос для разговора.">
-        <div>💬</div><b>Поговорить</b>
-        <span>Идеи и интересные темы</span>
-      </button>
-    </div>
-
-    <div class="messages" id="messages" aria-live="polite"></div>
-  </section>
-
-  <div class="composer-wrap">
-    <div class="composer">
-      <textarea id="prompt" rows="2"
-        placeholder="Напиши вопрос или расскажи, что хочешь сделать…"></textarea>
-      <div class="composer-bottom">
-        <span class="hint">Enter — отправить · Shift+Enter — новая строка</span>
-        <button class="send" id="sendBtn">Отправить ↑</button>
-      </div>
-    </div>
-    <div class="notice">
-      Это демоверсия. Для настоящих ответов ИИ понадобится подключение к модели через сервер.
-    </div>
-  </div>
-</main>
 </div>
 
 <script>
-(() => {
-  const $ = selector => document.querySelector(selector);
-  const app = $('#app');
-  const promptBox = $('#prompt');
-  const messages = $('#messages');
+// ==== НАСТРОЙКА ====
+// Вставь свой API-ключ (OpenAI / DeepSeek / другой совместимый)
+const API_KEY = "ВСТАВЬ_СВОЙ_КЛЮЧ";
+const API_URL = "https://api.openai.com/v1/chat/completions"; // для DeepSeek: https://api.deepseek.com/v1/chat/completions
+const MODEL   = "gpt-4o-mini";                               // для DeepSeek: "deepseek-chat"
 
-  function addMessage(text, who = 'assistant') {
-    $('#welcome').style.display = 'none';
-    $('#quick').style.display = 'none';
+const history = [
+  { role: "system", content: "Ты очень умный, дружелюбный помощник. Отвечай кратко и по делу." }
+];
 
-    const wrap = document.createElement('div');
-    wrap.className = 'message ' + (who === 'user' ? 'user' : '');
+const messagesEl = document.getElementById("messages");
+const inputEl = document.getElementById("input");
+const sendBtn = document.getElementById("send");
 
-    const avatar = document.createElement('div');
-    avatar.className = 'avatar';
-    avatar.textContent = who === 'user' ? 'Я' : '✦';
+function addMessage(text, who) {
+  const div = document.createElement("div");
+  div.className = "msg " + who;
+  div.textContent = text;
+  messagesEl.appendChild(div);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+  return div;
+}
 
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble';
+async function sendMessage() {
+  const text = inputEl.value.trim();
+  if (!text) return;
 
-    const meta = document.createElement('div');
-    meta.className = 'meta';
-    meta.textContent = who === 'user' ? 'Ты' : 'Astra · демо-ответ';
+  addMessage(text, "user");
+  history.push({ role: "user", content: text });
+  inputEl.value = "";
+  sendBtn.disabled = true;
 
-    const body = document.createElement('div');
-    body.textContent = text;
+  const botEl = addMessage("…", "bot");
 
-    bubble.append(meta, body);
-    wrap.append(avatar, bubble);
-    messages.append(wrap);
-    wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  }
-
-  function replyFor(question) {
-    const q = question.toLowerCase();
-    const level = $('#level').value;
-    const tone = $('#tone').value;
-
-    const style = {
-      simple: 'Объясню простыми словами. ',
-      examples: 'Разберём на примере. ',
-      detailed: 'Разложим вопрос на части. ',
-      expert: 'Рассмотрим последовательно и точно. '
-    }[level];
-
-    const ending = {
-      friendly: ' Давай разберёмся вместе!',
-      calm: ' Не спешим, всё рассмотрим по порядку.',
-      energetic: ' Отличная тема — вперёд!',
-      concise: ''
-    }[tone];
-
-    if (/привет|здравствуй|хай|hello/.test(q)) {
-      return 'Привет! Я Astra — твой демонстрационный помощник. ' +
-        'Можем обсуждать темы, придумывать проекты, учиться и писать код. ' +
-        'Что тебе интересно?' + ending;
-    }
-
-    if (/космос|астроном|чёрн.*дыр|черн.*дыр|планет|звезд|вселен/.test(q)) {
-      return style +
-        'Например, чёрная дыра — область пространства с настолько сильной ' +
-        'гравитацией, что за определённую границу не может выбраться даже свет. ' +
-        'Учёные изучают чёрные дыры по их влиянию на газ и звёзды рядом. ' +
-        'Можно дальше разобрать, как они появляются и как их обнаруживают.' +
-        ending;
-    }
-
-    if (/код|html|javascript|программ|ошибк|игр/.test(q)) {
-      return 'Давай разберём проект по шагам. HTML задаёт структуру страницы, ' +
-        'CSS отвечает за внешний вид, а JavaScript — за логику и действия. ' +
-        'Пришли свой код или опиши, какую игру хочешь создать. ' +
-        'Я помогу разобраться, но в этой версии код не запускается автоматически.';
-    }
-
-    if (/груст|плохо|тревож|страшно|одинок|пережива|поговор/.test(q)) {
-      return 'Я могу внимательно отнестись к твоим словам и помочь разложить ' +
-        'мысли по полочкам. Не обязательно сразу всё объяснять идеально. ' +
-        'Можешь начать с того, что сейчас больше всего занимает твои мысли.' +
-        ending;
-    }
-
-    if (/иде|придум|изобр|проект/.test(q)) {
-      return 'Давай превратим идею в проект. Сначала определим цель, затем ' +
-        'выберем самую простую первую версию, составим план и решим, как ' +
-        'проверить результат. Напиши, что хочешь создать, и мы разложим задачу ' +
-        'на понятные шаги.' + ending;
-    }
-
-    if (/объясн|почему|как работает|что такое/.test(q)) {
-      return style +
-        'Хорошее объяснение обычно состоит из главной мысли, нескольких ' +
-        'простых частей, примера и короткой проверки понимания. ' +
-        'Это пока демонстрационный ответ, а не результат настоящей языковой модели. ' +
-        'Для объяснений практически любых тем нужно подключить ИИ-сервис.' +
-        ending;
-    }
-
-    if (/спасибо/.test(q)) {
-      return 'Пожалуйста! Можем продолжить, рассмотреть другой пример или перейти ' +
-        'к следующему шагу.';
-    }
-
-    return 'Спасибо, что рассказал. Я могу помогать с идеями, планированием, ' +
-      'обучением и кодом. Сейчас я работаю в демо-режиме и не умею по-настоящему ' +
-      'рассуждать на любые темы. Попробуй уточнить, чего ты хочешь добиться и ' +
-      'что именно вызывает трудность — это поможет лучше организовать ответ.';
-  }
-
-  function send(text) {
-    const q = (text ?? promptBox.value).trim();
-    if (!q) return;
-
-    addMessage(q, 'user');
-    promptBox.value = '';
-
-    const wait = document.createElement('div');
-    wait.className = 'message';
-    wait.innerHTML =
-      '<div class="avatar">✦</div><div class="bubble">' +
-      '<div class="meta">Astra</div>Думаю…</div>';
-    messages.append(wait);
-
-    setTimeout(() => {
-      wait.remove();
-      addMessage(replyFor(q));
-    }, 350);
-
-    const history = $('#history');
-    history.innerHTML = '';
-    const item = document.createElement('button');
-    item.textContent = q.slice(0, 35) + (q.length > 35 ? '…' : '');
-    history.append(item);
-  }
-
-  function reset() {
-    messages.innerHTML = '';
-    $('#welcome').style.display = '';
-    $('#quick').style.display = '';
-    $('#history').innerHTML = '<button>Новый диалог</button>';
-    promptBox.value = '';
-  }
-
-  $('#sendBtn').addEventListener('click', () => send());
-
-  promptBox.addEventListener('keydown', event => {
-    if (event.key === 'Enter' && !event.shiftKey) {
-      event.preventDefault();
-      send();
-    }
-  });
-
-  document.querySelectorAll('[data-prompt]').forEach(button => {
-    button.addEventListener('click', () => {
-      send(button.dataset.prompt);
-      app.classList.remove('menu-open');
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + API_KEY
+      },
+      body: JSON.stringify({ model: MODEL, messages: history })
     });
-  });
+    const data = await res.json();
+    const answer = data.choices?.[0]?.message?.content || "Ошибка ответа";
+    botEl.textContent = answer;
+    history.push({ role: "assistant", content: answer });
+  } catch (e) {
+    botEl.textContent = "Ошибка: " + e.message;
+  } finally {
+    sendBtn.disabled = false;
+    inputEl.focus();
+  }
+}
 
-  $('#newChat').addEventListener('click', reset);
-  $('#clearBtn').addEventListener('click', reset);
-  $('#menuBtn').addEventListener('click', () => {
-    app.classList.toggle('menu-open');
-  });
-})();
+sendBtn.onclick = sendMessage;
+inputEl.addEventListener("keydown", e => { if (e.key === "Enter") sendMessage(); });
 </script>
 </body>
 </html>
