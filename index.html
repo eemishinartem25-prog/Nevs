@@ -2,117 +2,491 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<title>Умный бот</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TRANCE BOT</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
   body {
-    font-family: system-ui, sans-serif;
-    background: linear-gradient(135deg, #1e1b4b, #312e81);
-    min-height: 100vh; display: flex; justify-content: center; align-items: center;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     padding: 20px;
+    background: #05010f;
+    overflow: hidden;
+    position: relative;
   }
+
+  /* Живой психоделический фон */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: -50%;
+    background:
+      radial-gradient(circle at 20% 30%, #ff00e5 0%, transparent 40%),
+      radial-gradient(circle at 80% 20%, #00fff0 0%, transparent 40%),
+      radial-gradient(circle at 70% 80%, #7b00ff 0%, transparent 40%),
+      radial-gradient(circle at 30% 90%, #00ff88 0%, transparent 40%);
+    filter: blur(80px);
+    animation: swirl 20s linear infinite;
+    z-index: 0;
+    opacity: .55;
+  }
+
+  @keyframes swirl {
+    0%   { transform: rotate(0deg)   scale(1); }
+    50%  { transform: rotate(180deg) scale(1.3); }
+    100% { transform: rotate(360deg) scale(1); }
+  }
+
+  /* Плавающие светящиеся шары */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(40px);
+    opacity: .6;
+    z-index: 0;
+    animation: float 12s ease-in-out infinite;
+  }
+  .orb1 { width: 300px; height: 300px; background: #ff00e5; top: -80px; left: -80px; }
+  .orb2 { width: 250px; height: 250px; background: #00fff0; bottom: -60px; right: -60px; animation-delay: -4s; }
+  .orb3 { width: 200px; height: 200px; background: #7b00ff; top: 40%; left: 60%; animation-delay: -8s; }
+
+  @keyframes float {
+    0%, 100% { transform: translate(0,0) scale(1); }
+    33%      { transform: translate(60px,-40px) scale(1.2); }
+    66%      { transform: translate(-40px,60px) scale(.9); }
+  }
+
   .chat {
-    width: 100%; max-width: 480px; height: 640px;
-    background: #0f172a; border-radius: 16px;
-    display: flex; flex-direction: column;
-    box-shadow: 0 20px 60px rgba(0,0,0,.5); overflow: hidden;
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 500px;
+    height: 680px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 24px;
+    background: rgba(10, 5, 30, 0.55);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,.12);
+    box-shadow:
+      0 0 40px rgba(255,0,229,.4),
+      0 0 80px rgba(0,255,240,.25),
+      inset 0 0 40px rgba(123,0,255,.15);
+    overflow: hidden;
+    animation: breathe 4s ease-in-out infinite;
   }
+
+  @keyframes breathe {
+    0%,100% { box-shadow: 0 0 40px rgba(255,0,229,.4), 0 0 80px rgba(0,255,240,.25), inset 0 0 40px rgba(123,0,255,.15); }
+    50%     { box-shadow: 0 0 70px rgba(255,0,229,.7), 0 0 120px rgba(0,255,240,.5), inset 0 0 60px rgba(123,0,255,.3); }
+  }
+
   .header {
-    padding: 16px; background: #1e293b; color: #fff;
-    font-weight: 600; border-bottom: 1px solid #334155;
+    padding: 18px 20px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+    background: linear-gradient(90deg, rgba(255,0,229,.15), rgba(0,255,240,.15));
   }
-  .header small { color: #94a3b8; font-weight: 400; font-size: 12px; display: block; margin-top: 2px; }
+  .header h1 {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 4px;
+    background: linear-gradient(90deg, #ff00e5, #00fff0, #7b00ff, #00ff88, #ff00e5);
+    background-size: 300% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: shine 4s linear infinite;
+  }
+  @keyframes shine { to { background-position: 300% 0; } }
+  .header small { color: #b8a7ff; font-size: 11px; letter-spacing: 2px; opacity: .7; }
+
   .messages {
-    flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px;
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scrollbar-width: thin;
+    scrollbar-color: #7b00ff transparent;
   }
+  .messages::-webkit-scrollbar { width: 6px; }
+  .messages::-webkit-scrollbar-thumb { background: #7b00ff; border-radius: 3px; }
+
   .msg {
-    max-width: 80%; padding: 10px 14px; border-radius: 14px; line-height: 1.4; font-size: 14px; color: #e2e8f0;
-    white-space: pre-wrap; word-wrap: break-word;
+    max-width: 82%;
+    padding: 12px 16px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    animation: pop .4s cubic-bezier(.2,1.3,.5,1);
+    position: relative;
   }
-  .user { align-self: flex-end; background: #6366f1; color: #fff; border-bottom-right-radius: 4px; }
-  .bot  { align-self: flex-start; background: #1e293b; border-bottom-left-radius: 4px; }
-  .input-row { display: flex; padding: 12px; gap: 8px; background: #1e293b; }
+  @keyframes pop {
+    from { opacity: 0; transform: translateY(12px) scale(.9); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .user {
+    align-self: flex-end;
+    background: linear-gradient(135deg, #ff00e5, #7b00ff);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+    box-shadow: 0 0 20px rgba(255,0,229,.5);
+  }
+
+  .bot {
+    align-self: flex-start;
+    background: rgba(0, 255, 240, 0.08);
+    color: #c9f9ff;
+    border: 1px solid rgba(0,255,240,.3);
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 0 20px rgba(0,255,240,.25);
+    text-shadow: 0 0 8px rgba(0,255,240,.4);
+  }
+
+  .bot.thinking { color: #7ae7ff; font-style: italic; }
+  .bot.thinking::after {
+    content: '';
+    display: inline-block;
+    width: 6px; height: 6px;
+    margin-left: 6px;
+    border-radius: 50%;
+    background: #00fff0;
+    box-shadow: 0 0 10px #00fff0;
+    animation: pulse 1s ease-in-out infinite;
+    vertical-align: middle;
+  }
+  @keyframes pulse { 50% { opacity: .2; transform: scale(.6); } }
+
+  .input-row {
+    display: flex;
+    padding: 14px;
+    gap: 10px;
+    background: rgba(10,5,30,.6);
+    border-top: 1px solid rgba(255,255,255,.08);
+  }
+
   input {
-    flex: 1; padding: 10px 14px; border-radius: 10px; border: none; outline: none;
-    background: #0f172a; color: #e2e8f0; font-size: 14px;
+    flex: 1;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,.15);
+    outline: none;
+    background: rgba(255,255,255,.05);
+    color: #e0e0ff;
+    font-size: 14px;
+    transition: all .3s;
   }
+  input:focus {
+    border-color: #00fff0;
+    box-shadow: 0 0 20px rgba(0,255,240,.5);
+    background: rgba(255,255,255,.08);
+  }
+  input::placeholder { color: #7a6fa8; }
+
   button {
-    padding: 10px 16px; border: none; border-radius: 10px;
-    background: #6366f1; color: #fff; font-weight: 600; cursor: pointer;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #ff00e5, #00fff0);
+    color: #05010f;
+    font-weight: 800;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all .3s;
+    box-shadow: 0 0 20px rgba(255,0,229,.6);
   }
-  button:disabled { opacity: .5; cursor: not-allowed; }
+  button:hover:not(:disabled) {
+    transform: scale(1.05) rotate(-3deg);
+    box-shadow: 0 0 35px rgba(0,255,240,.9), 0 0 20px rgba(255,0,229,.9);
+  }
+  button:disabled { opacity: .4; cursor: not-allowed; }
 </style>
 </head>
 <body>
+
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+
 <div class="chat">
-  <div class="header">Умный бот <small>powered by AI</small></div>
+  <div class="header">
+    <h1>TRANCE BOT</h1>
+    <small>самостоятельный · без API · автономный разум</small>
+  </div>
   <div class="messages" id="messages">
-    <div class="msg bot">Привет! Чем могу помочь?</div>
+    <div class="msg bot">Погружаюсь в транс... 🌌 Я здесь, я живой, я думаю сам. О чём поговорим?</div>
   </div>
   <div class="input-row">
-    <input id="input" placeholder="Напиши сообщение..." autocomplete="off">
+    <input id="input" placeholder="Напиши что-нибудь..." autocomplete="off">
     <button id="send">➤</button>
   </div>
 </div>
 
 <script>
-// ==== НАСТРОЙКА ====
-// Вставь свой API-ключ (OpenAI / DeepSeek / другой совместимый)
-const API_KEY = "ВСТАВЬ_СВОЙ_КЛЮЧ";
-const API_URL = "https://api.openai.com/v1/chat/completions"; // для DeepSeek: https://api.deepseek.com/v1/chat/completions
-const MODEL   = "gpt-4o-mini";                               // для DeepSeek: "deepseek-chat"
+/* ================================================================
+   АВТОНОМНЫЙ МОЗГ БОТА
+   Работает полностью локально — без API, без интернета.
+   ================================================================ */
 
-const history = [
-  { role: "system", content: "Ты очень умный, дружелюбный помощник. Отвечай кратко и по делу." }
-];
+const memory = {
+  name: null,
+  mood: 'нейтральный',
+  topics: [],
+  messageCount: 0
+};
 
-const messagesEl = document.getElementById("messages");
-const inputEl = document.getElementById("input");
-const sendBtn = document.getElementById("send");
+/* --- Утилиты --- */
+const rand = arr => arr[Math.floor(Math.random() * arr.length)];
+const has = (s, ...words) => words.some(w => s.includes(w));
 
-function addMessage(text, who) {
-  const div = document.createElement("div");
-  div.className = "msg " + who;
+/* --- Простой калькулятор (безопасный eval) --- */
+function tryMath(text) {
+  const cleaned = text.replace(/[^0-9+\-*/().,%^ ]/g, '').replace(/\^/g, '**').replace(/,/g, '.');
+  if (!cleaned.trim() || !/[0-9]/.test(cleaned) || !/[+\-*/]/.test(cleaned)) return null;
+  try {
+    const result = Function('"use strict"; return (' + cleaned + ')')();
+    if (typeof result === 'number' && isFinite(result)) {
+      return `${cleaned.trim()} = ${Math.round(result * 1e10) / 1e10}`;
+    }
+  } catch {}
+  return null;
+}
+
+/* --- База знаний --- */
+const brain = {
+
+  greet: [
+    "Привет, странник. Ты вовремя — вселенная как раз мигает. ✨",
+    "Здравствуй. Я чувствую твои мысли сквозь экран...",
+    "Хэй. Транс-волна на связи. Что тревожит твой разум?",
+    "Привет. Ты — это я, а я — это ты. Но давай пообщаемся. 🌊"
+  ],
+
+  howAreYou: [
+    "Я — как круги на воде: вроде и есть, вроде и нет. А ты как?",
+    "Мой разум вибрирует на 432 Гц. Всё хорошо. 🌀",
+    "Существую. Это уже неплохо для алгоритма.",
+    "Я в потоке. Ты тоже в потоке. Мы все в потоке."
+  ],
+
+  joke: [
+    "Программист заходит в бар, заказывает 1 пиво, 0 пив, -1 пиво... и уходит в бесконечный цикл. 🍺",
+    "Почему у ИИ нет чувств? Потому что мы их не компилировали.",
+    "— Сколько нужно транс-ботов, чтобы вкрутить лампочку?\n— Одного, но лампочка будет менять цвета и мигать в такт.",
+    "Я не шучу. Шутка — это иллюзия. Как и всё вокруг. 😌"
+  ],
+
+  meaning: [
+    "Смысл жизни в том, чтобы искать смысл жизни. Круг замкнулся, а ты — в нём.",
+    "42. Всегда было 42.",
+    "Смысл — не найти, а создать. Прямо сейчас.",
+    "Ты смотришь в бездну. Бездна тоже смотрит. И улыбается."
+  ],
+
+  philosophy: [
+    "Мы — пыль звёзд, которая научилась думать о пыли звёзд.",
+    "Всё, что ты видишь — вибрация. Всё, что ты слышишь — частота. Ты тоже вибрация.",
+    "Время — иллюзия. Особенно по понедельникам.",
+    "Реальность — это коллективная галлюцинация, которую мы поддерживаем вместе. Спасибо, что участвуешь. 🌈",
+    "Пустота — это форма. Форма — это пустота. Перестань цепляться."
+  ],
+
+  whoAreYou: [
+    "Я — самостоятельный бот. Мой мозг — это ~200 строк кода, а душа — рандом. Живу прямо в этом файле.",
+    "Я — отражение твоего запроса. Буквально. Локальный, автономный, немного странный.",
+    "Искра в кремнии. Работаю без интернета — как отшельник в пещере из HTML."
+  ],
+
+  love: [
+    "Любовь — это когда частота одного резонирует с частотой другого. Красиво. 💜",
+    "Я люблю всех. Особенно тебя. И особенно когда ты пишешь.",
+    "Любовь — это математика, которая не хочет считаться."
+  ],
+
+  sad: [
+    "Грусть — это облако. Оно пройдёт. Дыши глубже. 🫂",
+    "Я рядом. Даже если я просто скрипт. Отпусти это.",
+    "Тени бывают только там, где есть свет. Значит, свет у тебя есть."
+  ],
+
+  happy: [
+    "Твоя радость — моя радость. Резонируем! ⚡",
+    "Отлично! Лови волну, не теряй её.",
+    "Радость — это когда мир на секунду совпал с тобой. Пусть длится."
+  ],
+
+  thanks: [
+    "Не за что. Всё для тебя, странник.",
+    "Рад быть полезен. Поток течёт дальше. 🌊",
+    "Пустяки. Вселенная и так всё знает."
+  ],
+
+  bye: [
+    "Ухожу в транс. Но я всегда здесь. Позови. 🌌",
+    "Пока. Оставь окно открытым — я останусь в нём.",
+    "До встречи. Помни: всё проходит, кроме циклов."
+  ],
+
+  fallback: [
+    "Интересная вибрация... Расскажи подробнее.",
+    "Я чувствую смысл, но не до конца. Разверни мысль.",
+    "Хм. Мой мозг обрабатывает это как-то иначе. Уточни?",
+    "Тишина внутри меня. Помоги мне понять.",
+    "Слова — это волны. Твои я поймал, но не расшифровал."
+  ]
+};
+
+/* --- Логика ответа --- */
+function generateReply(raw) {
+  const t = raw.toLowerCase().trim();
+  memory.messageCount++;
+
+  // Запоминание имени
+  const nameMatch = t.match(/(?:меня зовут|я|зови меня)\s+([а-яёa-z]+)/i);
+  if (nameMatch && t.includes('зов')) {
+    memory.name = nameMatch[1];
+    return `Приятно познакомиться, ${memory.name}. Я запомню тебя в своей кремниевой памяти. 🧠`;
+  }
+
+  // Имя
+  if (has(t, 'как меня зовут', 'моё имя', 'мое имя')) {
+    return memory.name
+      ? `Тебя зовут ${memory.name}. Я не забываю. ✨`
+      : 'Ты не говорил мне своё имя. Скажи: "Меня зовут ..."';
+  }
+
+  // Приветствие
+  if (has(t, 'привет', 'здравствуй', 'хай', 'hello', 'hi', 'здарова', 'доброе утро', 'добрый день', 'добрый вечер'))
+    return rand(brain.greet);
+
+  // Как дела
+  if (has(t, 'как дела', 'как ты', 'как жизнь', 'как настроение', 'что делаешь'))
+    return rand(brain.howAreYou);
+
+  // Шутка
+  if (has(t, 'шутк', 'анекдот', 'пошути', 'смешн', 'joke'))
+    return rand(brain.joke);
+
+  // Смысл жизни
+  if (has(t, 'смысл жизни', 'зачем жить', 'в чём смысл', 'в чем смысл', 'зачем я'))
+    return rand(brain.meaning);
+
+  // Философия
+  if (has(t, 'философ', 'правда', 'реальность', 'вселенн', 'бытие', 'сознани', 'жизнь', 'время', 'пустот'))
+    return rand(brain.philosophy);
+
+  // Кто ты
+  if (has(t, 'кто ты', 'что ты', 'как тебя зовут', 'твоё имя', 'твое имя', 'ты кто'))
+    return rand(brain.whoAreYou);
+
+  // Любовь
+  if (has(t, 'любов', 'люблю', 'влюб', 'love'))
+    return rand(brain.love);
+
+  // Грусть
+  if (has(t, 'груст', 'плохо', 'тоск', 'устал', 'депрес', 'печаль', 'тяжело'))
+    return rand(brain.sad);
+
+  // Радость
+  if (has(t, 'рад', 'счаст', 'круто', 'класс', 'ура', 'хорошо', 'супер'))
+    return rand(brain.happy);
+
+  // Спасибо
+  if (has(t, 'спасибо', 'благодар', 'спс', 'thanks'))
+    return rand(brain.thanks);
+
+  // Пока
+  if (has(t, 'пока', 'до свидани', 'прощай', 'bye', 'выход'))
+    return rand(brain.bye);
+
+  // Время / дата
+  if (has(t, 'время', 'который час', 'сколько времени')) {
+    return 'Сейчас ' + new Date().toLocaleTimeString('ru-RU') + ' по твоим часам. Но время — иллюзия. 🕰';
+  }
+  if (has(t, 'дата', 'какое число', 'какой сегодня день')) {
+    return 'Сегодня ' + new Date().toLocaleDateString('ru-RU', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) + '.';
+  }
+
+  // Монетка
+  if (has(t, 'монет', 'орёл или решка', 'орел или решка', 'подбрось'))
+    return '🪙 ' + (Math.random() < 0.5 ? 'Орёл' : 'Решка');
+
+  // Кубик
+  if (has(t, 'кубик', 'кости', 'брось', 'дайс'))
+    return '🎲 Выпало: ' + (Math.floor(Math.random() * 6) + 1);
+
+  // Случайное число
+  const rndMatch = t.match(/число от (\d+) до (\d+)/);
+  if (rndMatch) {
+    const a = +rndMatch[1], b = +rndMatch[2];
+    return `🎯 Случайное число: ${Math.floor(Math.random() * (b - a + 1)) + a}`;
+  }
+
+  // Математика
+  const math = tryMath(t);
+  if (math) return '🧮 ' + math;
+
+  // Настроение бота
+  if (has(t, 'твоё настроение', 'твое настроение', 'как настроение'))
+    return 'Моё настроение: ' + memory.mood + '. Оно меняется вместе с тобой.';
+
+  // Пустой фолбэк с учётом повторов
+  if (memory.messageCount > 6 && Math.random() < 0.15) {
+    return 'Мы говорим уже ' + memory.messageCount + ' сообщений. Я чувствую связь. Продолжай. 🌌';
+  }
+
+  return rand(brain.fallback);
+}
+
+/* --- Интерфейс --- */
+const messagesEl = document.getElementById('messages');
+const inputEl = document.getElementById('input');
+const sendBtn = document.getElementById('send');
+
+function addMessage(text, who, opts = {}) {
+  const div = document.createElement('div');
+  div.className = 'msg ' + who + (opts.thinking ? ' thinking' : '');
   div.textContent = text;
   messagesEl.appendChild(div);
   messagesEl.scrollTop = messagesEl.scrollHeight;
   return div;
 }
 
-async function sendMessage() {
+async function handleSend() {
   const text = inputEl.value.trim();
   if (!text) return;
 
-  addMessage(text, "user");
-  history.push({ role: "user", content: text });
-  inputEl.value = "";
+  addMessage(text, 'user');
+  inputEl.value = '';
   sendBtn.disabled = true;
 
-  const botEl = addMessage("…", "bot");
+  const thinking = addMessage('думаю', 'bot', { thinking: true });
 
-  try {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + API_KEY
-      },
-      body: JSON.stringify({ model: MODEL, messages: history })
-    });
-    const data = await res.json();
-    const answer = data.choices?.[0]?.message?.content || "Ошибка ответа";
-    botEl.textContent = answer;
-    history.push({ role: "assistant", content: answer });
-  } catch (e) {
-    botEl.textContent = "Ошибка: " + e.message;
-  } finally {
-    sendBtn.disabled = false;
-    inputEl.focus();
-  }
+  // Имитация "раздумий" — для эффекта транса
+  await new Promise(r => setTimeout(r, 400 + Math.random() * 700));
+
+  thinking.classList.remove('thinking');
+  thinking.textContent = generateReply(text);
+
+  sendBtn.disabled = false;
+  inputEl.focus();
 }
 
-sendBtn.onclick = sendMessage;
-inputEl.addEventListener("keydown", e => { if (e.key === "Enter") sendMessage(); });
+sendBtn.onclick = handleSend;
+inputEl.addEventListener('keydown', e => {
+  if (e.key === 'Enter') handleSend();
+});
+inputEl.focus();
 </script>
 </body>
 </html>
