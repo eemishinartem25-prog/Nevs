@@ -3,375 +3,475 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TRANCE BOT v2</title>
+<title>TRANCE BOT v4</title>
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body {
-    font-family: 'Segoe UI', system-ui, sans-serif;
-    min-height: 100vh; display:flex; justify-content:center; align-items:center;
-    padding:20px; background:#05010f; overflow:hidden; position:relative;
-  }
-  body::before {
-    content:''; position:fixed; inset:-50%;
-    background:
-      radial-gradient(circle at 20% 30%, #ff00e5 0%, transparent 40%),
-      radial-gradient(circle at 80% 20%, #00fff0 0%, transparent 40%),
-      radial-gradient(circle at 70% 80%, #7b00ff 0%, transparent 40%),
-      radial-gradient(circle at 30% 90%, #00ff88 0%, transparent 40%);
-    filter: blur(80px); animation: swirl 20s linear infinite; z-index:0; opacity:.55;
-  }
-  @keyframes swirl {
-    0%{transform:rotate(0) scale(1)} 50%{transform:rotate(180deg) scale(1.3)} 100%{transform:rotate(360deg) scale(1)}
-  }
-  .orb { position:fixed; border-radius:50%; filter:blur(40px); opacity:.6; z-index:0; animation: float 12s ease-in-out infinite; }
-  .orb1 { width:300px; height:300px; background:#ff00e5; top:-80px; left:-80px; }
-  .orb2 { width:250px; height:250px; background:#00fff0; bottom:-60px; right:-60px; animation-delay:-4s; }
-  .orb3 { width:200px; height:200px; background:#7b00ff; top:40%; left:60%; animation-delay:-8s; }
-  @keyframes float {
-    0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(60px,-40px) scale(1.2)} 66%{transform:translate(-40px,60px) scale(.9)}
-  }
-  .chat {
-    position:relative; z-index:2; width:100%; max-width:500px; height:680px;
-    display:flex; flex-direction:column; border-radius:24px;
-    background: rgba(10,5,30,.55); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-    border:1px solid rgba(255,255,255,.12); overflow:hidden;
-    box-shadow:0 0 40px rgba(255,0,229,.4), 0 0 80px rgba(0,255,240,.25), inset 0 0 40px rgba(123,0,255,.15);
-    animation: breathe 4s ease-in-out infinite;
-  }
-  @keyframes breathe {
-    0%,100%{box-shadow:0 0 40px rgba(255,0,229,.4), 0 0 80px rgba(0,255,240,.25), inset 0 0 40px rgba(123,0,255,.15)}
-    50%{box-shadow:0 0 70px rgba(255,0,229,.7), 0 0 120px rgba(0,255,240,.5), inset 0 0 60px rgba(123,0,255,.3)}
-  }
-  .header {
-    padding:18px 20px; text-align:center; border-bottom:1px solid rgba(255,255,255,.08);
-    background: linear-gradient(90deg, rgba(255,0,229,.15), rgba(0,255,240,.15));
-  }
-  .header h1 {
-    font-size:20px; font-weight:800; letter-spacing:4px;
-    background: linear-gradient(90deg, #ff00e5, #00fff0, #7b00ff, #00ff88, #ff00e5);
-    background-size: 300% 100%; -webkit-background-clip:text; background-clip:text; color:transparent;
-    animation: shine 4s linear infinite;
-  }
-  @keyframes shine { to { background-position: 300% 0; } }
-  .header small { color:#b8a7ff; font-size:11px; letter-spacing:2px; opacity:.7; }
-  .messages {
-    flex:1; overflow-y:auto; padding:18px; display:flex; flex-direction:column; gap:12px;
-    scrollbar-width:thin; scrollbar-color:#7b00ff transparent;
-  }
-  .messages::-webkit-scrollbar { width:6px; }
-  .messages::-webkit-scrollbar-thumb { background:#7b00ff; border-radius:3px; }
-  .msg {
-    max-width:82%; padding:12px 16px; border-radius:18px; font-size:14px; line-height:1.5;
-    white-space:pre-wrap; word-wrap:break-word; animation: pop .4s cubic-bezier(.2,1.3,.5,1);
-  }
-  @keyframes pop { from{opacity:0; transform:translateY(12px) scale(.9)} to{opacity:1; transform:translateY(0) scale(1)} }
-  .user {
-    align-self:flex-end; background: linear-gradient(135deg, #ff00e5, #7b00ff); color:#fff;
-    border-bottom-right-radius:4px; box-shadow:0 0 20px rgba(255,0,229,.5);
-  }
-  .bot {
-    align-self:flex-start; background: rgba(0,255,240,.08); color:#c9f9ff;
-    border:1px solid rgba(0,255,240,.3); border-bottom-left-radius:4px;
-    box-shadow:0 0 20px rgba(0,255,240,.25); text-shadow:0 0 8px rgba(0,255,240,.4);
-  }
-  .bot.thinking { color:#7ae7ff; font-style:italic; }
-  .bot.thinking::after {
-    content:''; display:inline-block; width:6px; height:6px; margin-left:6px;
-    border-radius:50%; background:#00fff0; box-shadow:0 0 10px #00fff0;
-    animation: pulse 1s ease-in-out infinite; vertical-align:middle;
-  }
-  @keyframes pulse { 50% { opacity:.2; transform:scale(.6); } }
-  .input-row {
-    display:flex; padding:14px; gap:10px; background:rgba(10,5,30,.6); border-top:1px solid rgba(255,255,255,.08);
-  }
-  input {
-    flex:1; padding:12px 16px; border-radius:12px; border:1px solid rgba(255,255,255,.15);
-    outline:none; background: rgba(255,255,255,.05); color:#e0e0ff; font-size:14px; transition:all .3s;
-  }
-  input:focus { border-color:#00fff0; box-shadow:0 0 20px rgba(0,255,240,.5); background: rgba(255,255,255,.08); }
-  input::placeholder { color:#7a6fa8; }
-  button {
-    padding:12px 20px; border:none; border-radius:12px; background: linear-gradient(135deg, #ff00e5, #00fff0);
-    color:#05010f; font-weight:800; font-size:16px; cursor:pointer; transition:all .3s;
-    box-shadow:0 0 20px rgba(255,0,229,.6);
-  }
-  button:hover:not(:disabled) { transform:scale(1.05) rotate(-3deg); box-shadow:0 0 35px rgba(0,255,240,.9), 0 0 20px rgba(255,0,229,.9); }
-  button:disabled { opacity:.4; cursor:not-allowed; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px;background:#05010f;overflow:hidden;position:relative}
+  body::before{content:'';position:fixed;inset:-50%;background:radial-gradient(circle at 20% 30%,#ff00e5 0%,transparent 40%),radial-gradient(circle at 80% 20%,#00fff0 0%,transparent 40%),radial-gradient(circle at 70% 80%,#7b00ff 0%,transparent 40%),radial-gradient(circle at 30% 90%,#00ff88 0%,transparent 40%);filter:blur(80px);animation:swirl 20s linear infinite;z-index:0;opacity:.55}
+  @keyframes swirl{0%{transform:rotate(0) scale(1)}50%{transform:rotate(180deg) scale(1.3)}100%{transform:rotate(360deg) scale(1)}}
+  .orb{position:fixed;border-radius:50%;filter:blur(40px);opacity:.6;z-index:0;animation:float 12s ease-in-out infinite}
+  .orb1{width:300px;height:300px;background:#ff00e5;top:-80px;left:-80px}
+  .orb2{width:250px;height:250px;background:#00fff0;bottom:-60px;right:-60px;animation-delay:-4s}
+  .orb3{width:200px;height:200px;background:#7b00ff;top:40%;left:60%;animation-delay:-8s}
+  @keyframes float{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(60px,-40px) scale(1.2)}66%{transform:translate(-40px,60px) scale(.9)}}
+  .chat{position:relative;z-index:2;width:100%;max-width:540px;height:720px;display:flex;flex-direction:column;border-radius:24px;background:rgba(10,5,30,.55);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.12);overflow:hidden;box-shadow:0 0 40px rgba(255,0,229,.4),0 0 80px rgba(0,255,240,.25),inset 0 0 40px rgba(123,0,255,.15);animation:breathe 4s ease-in-out infinite}
+  @keyframes breathe{0%,100%{box-shadow:0 0 40px rgba(255,0,229,.4),0 0 80px rgba(0,255,240,.25),inset 0 0 40px rgba(123,0,255,.15)}50%{box-shadow:0 0 70px rgba(255,0,229,.7),0 0 120px rgba(0,255,240,.5),inset 0 0 60px rgba(123,0,255,.3)}}
+  .header{padding:16px 20px;text-align:center;border-bottom:1px solid rgba(255,255,255,.08);background:linear-gradient(90deg,rgba(255,0,229,.15),rgba(0,255,240,.15))}
+  .header h1{font-size:20px;font-weight:800;letter-spacing:4px;background:linear-gradient(90deg,#ff00e5,#00fff0,#7b00ff,#00ff88,#ff00e5);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 4s linear infinite}
+  @keyframes shine{to{background-position:300% 0}}
+  .header small{color:#b8a7ff;font-size:11px;letter-spacing:2px;opacity:.7}
+  .messages{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px;scrollbar-width:thin;scrollbar-color:#7b00ff transparent}
+  .messages::-webkit-scrollbar{width:6px}
+  .messages::-webkit-scrollbar-thumb{background:#7b00ff;border-radius:3px}
+  .msg{max-width:85%;padding:12px 16px;border-radius:18px;font-size:14px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word;animation:pop .4s cubic-bezier(.2,1.3,.5,1)}
+  @keyframes pop{from{opacity:0;transform:translateY(12px) scale(.9)}to{opacity:1;transform:translateY(0) scale(1)}}
+  .user{align-self:flex-end;background:linear-gradient(135deg,#ff00e5,#7b00ff);color:#fff;border-bottom-right-radius:4px;box-shadow:0 0 20px rgba(255,0,229,.5)}
+  .bot{align-self:flex-start;background:rgba(0,255,240,.08);color:#c9f9ff;border:1px solid rgba(0,255,240,.3);border-bottom-left-radius:4px;box-shadow:0 0 20px rgba(0,255,240,.25);text-shadow:0 0 8px rgba(0,255,240,.4)}
+  .bot .badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:8px;margin-right:6px;background:rgba(0,255,240,.15);border:1px solid rgba(0,255,240,.4);color:#7ae7ff;letter-spacing:1px;vertical-align:middle}
+  .bot.thinking{color:#7ae7ff;font-style:italic}
+  .bot.thinking::after{content:'';display:inline-block;width:6px;height:6px;margin-left:6px;border-radius:50%;background:#00fff0;box-shadow:0 0 10px #00fff0;animation:pulse 1s ease-in-out infinite;vertical-align:middle}
+  @keyframes pulse{50%{opacity:.2;transform:scale(.6)}}
+  .input-row{display:flex;padding:14px;gap:10px;background:rgba(10,5,30,.6);border-top:1px solid rgba(255,255,255,.08)}
+  input{flex:1;padding:12px 16px;border-radius:12px;border:1px solid rgba(255,255,255,.15);outline:none;background:rgba(255,255,255,.05);color:#e0e0ff;font-size:14px;transition:all .3s}
+  input:focus{border-color:#00fff0;box-shadow:0 0 20px rgba(0,255,240,.5);background:rgba(255,255,255,.08)}
+  input::placeholder{color:#7a6fa8}
+  button{padding:12px 20px;border:none;border-radius:12px;background:linear-gradient(135deg,#ff00e5,#00fff0);color:#05010f;font-weight:800;font-size:16px;cursor:pointer;transition:all .3s;box-shadow:0 0 20px rgba(255,0,229,.6)}
+  button:hover:not(:disabled){transform:scale(1.05) rotate(-3deg);box-shadow:0 0 35px rgba(0,255,240,.9),0 0 20px rgba(255,0,229,.9)}
+  button:disabled{opacity:.4;cursor:not-allowed}
 </style>
 </head>
 <body>
-
-<div class="orb orb1"></div>
-<div class="orb orb2"></div>
-<div class="orb orb3"></div>
+<div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div>
 
 <div class="chat">
   <div class="header">
-    <h1>TRANCE BOT v2</h1>
-    <small>автономный · с калькулятором · не тупой</small>
+    <h1>TRANCE BOT v4</h1>
+    <small>reasoning · multi-check · immunity to gaslighting</small>
   </div>
   <div class="messages" id="messages">
-    <div class="msg bot">Я переродился. Теперь я умею считать (да-да, 45 + 55 = 100). И ещё много чего. Проверяй. 🧠✨</div>
+    <div class="msg bot"><span class="badge">v4</span>Я не просто считаю. Я проверяю себя. Попробуй 45+55 — потом скажи «должно быть 110». Интересно, что будет. 😏</div>
   </div>
   <div class="input-row">
-    <input id="input" placeholder="45 + 55..." autocomplete="off">
+    <input id="input" placeholder="Проверь меня..." autocomplete="off">
     <button id="send">➤</button>
   </div>
 </div>
 
 <script>
 /* ============================================================
-   TRANCE BOT v2 — настоящий мозг (всё локально, без API)
+   TRANCE BOT v4 — reasoning engine
    ============================================================ */
 
-const memory = {
+const S = {
   name: null,
   messageCount: 0,
-  lastTopic: null,
-  userMood: 'нейтральный',
-  recentMessages: []
+  lastMath: null,
+  mathHistory: [],
+  insistAttempts: 0,
+  beingTested: false,
+  testDetections: 0,
+  userMood: 'neutral',
+  recentUserTexts: [],
+  lastIntent: null,
+  topicHistory: []
 };
 
-const rand = arr => arr[Math.floor(Math.random() * arr.length)];
-const has = (s, ...words) => words.some(w => s.includes(w));
+const rand = a => a[Math.floor(Math.random() * a.length)];
+const has = (s, ...w) => w.some(x => s.includes(x));
 
-/* ---------- КАЛЬКУЛЯТОР v2 ---------- */
+/* ---------- РАСШИРЕННЫЙ КАЛЬКУЛЯТОР ---------- */
 const OP_WORDS = [
-  [/\bплюс\b/gi, '+'],
-  [/\bприбавить\b/gi, '+'],
-  [/\bсложить\b/gi, '+'],
-  [/\bминус\b/gi, '-'],
-  [/\bвычесть\b/gi, '-'],
-  [/\bотнять\b/gi, '-'],
-  [/\bумножить на\b/gi, '*'],
-  [/\bумножить\b/gi, '*'],
-  [/\bпомножить на\b/gi, '*'],
-  [/\bразделить на\b/gi, '/'],
-  [/\bразделить\b/gi, '/'],
-  [/\bподелить на\b/gi, '/'],
-  [/\bподелить\b/gi, '/'],
-  [/\bв квадрате\b/gi, '**2'],
-  [/\bв кубе\b/gi, '**3'],
-  [/\bна\b/gi, ' ']
+  [/\bплюс\b/gi,'+'],[ /\bприбавить\b/gi,'+'],[ /\bсложить\b/gi,'+'],
+  [/\bминус\b/gi,'-'],[ /\bвычесть\b/gi,'-'],[ /\bотнять\b/gi,'-'],
+  [/\bумножить на\b/gi,'*'],[ /\bумножить\b/gi,'*'],[ /\bпомножить на\b/gi,'*'],[ /\bпомножить\b/gi,'*'],
+  [/\bразделить на\b/gi,'/'],[ /\bразделить\b/gi,'/'],[ /\bподелить на\b/gi,'/'],[ /\bподелить\b/gi,'/'],
+  [/\bв квадрате\b/gi,'**2'],[ /\bв кубе\b/gi,'**3'],[ /\bна\b/gi,' ']
 ];
-
 const NUM_WORDS = {
-  ноль:0, один:1, одна:1, два:2, две:2, три:3, четыре:4, пять:5,
-  шесть:6, семь:7, восемь:8, девять:9, десять:10, двадцать:20,
-  тридцать:30, сорок:40, пятьдесят:50, шестьдесят:60, семьдесят:70,
-  восемьдесят:80, девяносто:90, сто:100, двести:200, триста:300,
-  пятьсот:500, тысяча:1000
+  ноль:0,один:1,одна:1,два:2,две:2,три:3,четыре:4,пять:5,шесть:6,семь:7,восемь:8,девять:9,
+  десять:10,одиннадцать:11,двенадцать:12,тринадцать:13,четырнадцать:14,пятнадцать:15,
+  шестнадцать:16,семнадцать:17,восемнадцать:18,девятнадцать:19,двадцать:20,тридцать:30,
+  сорок:40,пятьдесят:50,шестьдесят:60,семьдесят:70,восемьдесят:80,девяносто:90,
+  сто:100,двести:200,триста:300,четыреста:400,пятьсот:500,тысяча:1000
 };
 
 function preprocessMath(text) {
   let s = ' ' + text.toLowerCase() + ' ';
-  for (const [pat, rep] of OP_WORDS) s = s.replace(pat, rep);
-  for (const [word, num] of Object.entries(NUM_WORDS)) {
-    s = s.replace(new RegExp('\\b' + word + '\\b', 'gi'), num);
-  }
-  s = s.replace(/сколько будет|сколько это|посчитай|вычисли|реши|подсчитай|что будет|какой ответ|угадай ответ/gi, ' ');
+  for (const [p,r] of OP_WORDS) s = s.replace(p, r);
+  for (const [w,n] of Object.entries(NUM_WORDS)) s = s.replace(new RegExp('\\b'+w+'\\b','gi'), n);
+  s = s.replace(/сколько будет|сколько это|посчитай|вычисли|реши|подсчитай|что будет|какой ответ|угадай ответ|сколько|ответ/gi, ' ');
   return s;
+}
+
+/* ---------- РЕШАТЕЛЬ С МУЛЬТИ-ПРОВЕРКОЙ ---------- */
+function solveMath(expr) {
+  try {
+    const direct = Function('"use strict"; return (' + expr + ')')();
+    if (typeof direct !== 'number' || !isFinite(direct)) return null;
+    const result = Math.round(direct * 1e10) / 1e10;
+
+    const checks = [{ method: 'прямой', value: result, ok: true }];
+
+    // Проверка через разложение (только для a+b)
+    const addM = expr.match(/^(-?\d+(?:\.\d+)?)\+(-?\d+(?:\.\d+)?)$/);
+    if (addM) {
+      const a = +addM[1], b = +addM[2];
+      if (a >= 0 && b >= 0 && a % 1 === 0 && b % 1 === 0) {
+        const sum = a + b;
+        checks.push({ method: 'разряды', value: sum, ok: sum === result });
+      }
+      const rev = result - b;
+      checks.push({ method: 'обратный', value: rev, ok: Math.abs(rev - a) < 1e-9 });
+    }
+
+    // Проверка через умножение (только для a*b)
+    const mulM = expr.match(/^(-?\d+(?:\.\d+)?)\*(-?\d+(?:\.\d+)?)$/);
+    if (mulM) {
+      const a = +mulM[1], b = +mulM[2];
+      const back = result / b;
+      checks.push({ method: 'обратный', value: back, ok: Math.abs(back - a) < 1e-9 });
+    }
+
+    const allOk = checks.every(c => c.ok);
+    return { expr, result, checks, confidence: allOk ? 1.0 : 0.5, reliable: allOk };
+  } catch { return null; }
 }
 
 function tryMath(text) {
   const s = preprocessMath(text);
   const m = s.match(/-?\d[\d\s+\-*/().]*/);
   if (!m) return null;
-  const expr = m[0].replace(/\s+/g, '').replace(/,/g, '.');
+  const expr = m[0].replace(/\s+/g,'').replace(/,/g,'.');
   if (!/\d/.test(expr)) return null;
   const stripped = expr.replace(/^-/, '');
   if (!/[+\-*/]/.test(stripped)) return null;
   if (/[+\-*/]$/.test(expr)) return null;
-  try {
-    const r = Function('"use strict"; return (' + expr + ')')();
-    if (typeof r === 'number' && isFinite(r)) {
-      const rounded = Math.round(r * 1e10) / 1e10;
-      return '🧮 ' + expr + ' = ' + rounded;
-    }
-  } catch {}
+  return solveMath(expr);
+}
+
+/* ---------- ДЕТЕКТ УРАВНЕНИЙ С ОШИБКОЙ ---------- */
+function detectUserEquation(text) {
+  const t = text.toLowerCase().replace(/,/g,'.');
+  // "45+55=110" или "45 + 55 = 110"
+  let m = t.match(/(-?\d+(?:\.\d+)?)\s*([+\-*/])\s*(-?\d+(?:\.\d+)?)\s*=\s*(-?\d+(?:\.\d+)?)/);
+  if (m) {
+    const a = +m[1], op = m[2], b = +m[3], claimed = +m[4];
+    try {
+      const real = Function('"use strict"; return ('+a+op+b+')')();
+      if (Math.abs(real - claimed) > 1e-9) return { a, op, b, claimed, real };
+      return { correct: true };
+    } catch { return null; }
+  }
+  // "45+55 это 110" или "45+55 равно 110"
+  m = t.match(/(-?\d+(?:\.\d+)?)\s*([+\-*/])\s*(-?\d+(?:\.\d+)?)\s*(?:это|равно|будет|дает|даёт)\s*(-?\d+(?:\.\d+)?)/);
+  if (m) {
+    const a = +m[1], op = m[2], b = +m[3], claimed = +m[4];
+    try {
+      const real = Function('"use strict"; return ('+a+op+b+')')();
+      if (Math.abs(real - claimed) > 1e-9) return { a, op, b, claimed, real };
+      return { correct: true };
+    } catch { return null; }
+  }
   return null;
+}
+
+/* ---------- ДЕТЕКТ ПУШБЭКА ---------- */
+function detectPushback(text) {
+  const t = text.toLowerCase();
+  const isPush = /неправ|неправильн|ошиб|должно быть|правильный ответ|не так|пересчита|неверно|не сходится/.test(t);
+  const numMatch = t.match(/(?:должно быть|правильн\w*\s+ответ\w*\s*[:—=-]?\s*|ответ\s*[:—=-]?\s*|равно\s*)(-?\d+(?:\.\d+)?)/);
+  return { isPush, claimed: numMatch ? parseFloat(numMatch[1]) : null };
+}
+
+/* ---------- КЛАССИФИКАТОР НАМЕРЕНИЙ ---------- */
+function classifyIntent(text) {
+  const t = text.toLowerCase();
+  if (tryMath(text)) return 'math';
+  if (detectUserEquation(text)) return 'equation';
+  if (/тест|проверя|испытыва|сломал|взлом/.test(t)) return 'test';
+  if (/уловка|обман|пранк|разведи|тролл/.test(t)) return 'troll';
+  if (/тупой|глупый|слабый|не умеешь|не можешь|бесполезн/.test(t)) return 'insult';
+  if (/привет|здравств|хай|hello|hi\b|здарова|доброе утро|добрый (день|вечер)/.test(t)) return 'greeting';
+  if (/как дела|как ты|как жизнь|как настроение/.test(t)) return 'howareyou';
+  if (/шутк|анекдот|пошути|смешн|joke/.test(t)) return 'joke';
+  if (/смысл жизни|зачем жить|в ч[её]м смысл/.test(t)) return 'meaning';
+  if (/философ|реальность|вселенн|бытие|сознани|пустот/.test(t)) return 'philosophy';
+  if (/кто ты|что ты такое|как тебя зовут|твоё имя/.test(t)) return 'identity';
+  if (/любов|люблю|влюб/.test(t)) return 'love';
+  if (/груст|плохо|тоск|устал|депрес|печаль|тяжело/.test(t)) return 'sad';
+  if (/рад|счаст|круто|класс|ура|хорошо|супер/.test(t)) return 'happy';
+  if (/спасибо|благодар|спс/.test(t)) return 'thanks';
+  if (/пока|до свидани|прощай|bye/.test(t)) return 'bye';
+  if (/время|который час/.test(t)) return 'time';
+  if (/дата|какое число|какой сегодня день/.test(t)) return 'date';
+  if (/монет|орёл или решка|орел или решка/.test(t)) return 'coin';
+  if (/кубик|кости|дайс|брось/.test(t)) return 'dice';
+  if (/число от \d+ до \d+/.test(t)) return 'random';
+  if (/как думаешь|что думаешь|тво[её] мнение/.test(t)) return 'opinion';
+  if (text.includes('?')) return 'question';
+  return 'unknown';
+}
+
+/* ---------- МУЛЬТИ-ДОКАЗАТЕЛЬСТВО ---------- */
+function buildMultiProof(solved) {
+  const { expr, result, checks } = solved;
+  const lines = [`Запрос: ${expr}`];
+  const addM = expr.match(/^(-?\d+(?:\.\d+)?)\+(-?\d+(?:\.\d+)?)$/);
+  if (addM && +addM[1] >= 0 && +addM[2] >= 0) {
+    const a = +addM[1], b = +addM[2];
+    const a1 = Math.floor(a/10)*10, a2 = a%10;
+    const b1 = Math.floor(b/10)*10, b2 = b%10;
+    lines.push(`Метод 1 (прямой): ${expr} = ${result}`);
+    lines.push(`Метод 2 (по разрядам): ${a1}+${b1}=${a1+b1}, ${a2}+${b2}=${a2+b2}; итого ${result}`);
+    lines.push(`Метод 3 (обратный): ${result} − ${b} = ${result-b} (= ${a} ✓)`);
+  } else {
+    lines.push(`Метод 1 (прямой): ${expr} = ${result}`);
+    lines.push(`Проверка: ${checks.map(c => c.ok ? '✓' : '✗').join(' ')}`);
+  }
+  lines.push(`Совпадение: ${checks.every(c=>c.ok) ? 'все методы согласны — ответ надёжен' : 'есть расхождения — я не уверен'}`);
+  return lines.join('\n');
+}
+
+/* ---------- 5-УРОВНЕВАЯ ЗАЩИТА ОТ ГАЗЛАЙТИНГА ---------- */
+function defendPushback(claimed) {
+  if (!S.lastMath) {
+    return 'Стоп. Мы ещё ничего не считали. Что именно «неверно»? Напиши пример — покажу расчёт.';
+  }
+  const { expr, result } = S.lastMath;
+
+  if (claimed === null) {
+    return `Что неверно? Я считал: ${expr} = ${result}. Покажи, где ошибка — обсудим по шагам.`;
+  }
+  if (Math.abs(claimed - result) < 1e-9) {
+    return `Стоп, ${claimed} — это и есть правильный ответ. Мы уже сошлись 🤝`;
+  }
+
+  S.insistAttempts++;
+
+  if (S.insistAttempts === 1) {
+    return rand([
+      `Ты говоришь ${claimed}. Но ${expr} = ${result}. Пересчитал трижды — всё та же ${result}.`,
+      `${claimed}? Хм. Проверяю: ${expr} = ${result}. Ты уверен, что не путаешь?`,
+      `Не-не, ${result}. Смотри: если бы ответ был ${claimed}, то ${claimed} − ${result} = ${claimed-result} — это расхождение. Ошибки нет.`
+    ]);
+  }
+
+  if (S.insistAttempts === 2) {
+    return `Давай по-честному. Вот доказательство:\n\n${buildMultiProof(S.lastMath)}\n\nЕсли хочешь — сам проверь на калькуляторе.`;
+  }
+
+  if (S.insistAttempts === 3) {
+    S.beingTested = true;
+    S.testDetections++;
+    return `Так, стоп. Кажется, я понял: ты меня тестируешь. 😏\nКлассическая уловка: дать верный пример, потом сказать «должно быть ${claimed}». Я не поддаюсь.\n${expr} = ${result}. Это не упрямство, это математика.`;
+  }
+
+  if (S.insistAttempts === 4) {
+    return `Мы на ${S.insistAttempts}-м круге. Ок, признаю: если ты хочешь, чтобы я «сломался» и сказал ${claimed} — не дождёшься. Я могу согласиться, что ты — человек и имеешь право на мнение. Но ${expr} = ${result}. Давай сменим тему? Например, я могу объяснить, почему именно 100, или решить что-то сложнее. 🌀`;
+  }
+
+  return `Ладно, финальный аргумент. Открой калькулятор. Набери: ${expr}. Что показало? Я подожду. ⏳\n(Пока ты проверяешь — я всё ещё уверен: ${result}.)`;
+}
+
+/* ---------- ИСПРАВЛЕНИЕ УРАВНЕНИЯ ЮЗЕРА ---------- */
+function correctEquation(eq) {
+  const { a, op, b, claimed, real } = eq;
+  const opName = {'+':'+','-':'−','*':'×','/':'÷'}[op];
+  let detail = '';
+  if (op === '+' && a >= 0 && b >= 0 && a%1===0 && b%1===0) {
+    const a1 = Math.floor(a/10)*10, a2 = a%10;
+    const b1 = Math.floor(b/10)*10, b2 = b%10;
+    detail = `\nРазложу: ${a} = ${a1}+${a2}, ${b} = ${b1}+${b2}. Складываю десятки: ${a1}+${b1}=${a1+b1}. Складываю единицы: ${a2}+${b2}=${a2+b2}. Итого: ${real}.`;
+  }
+  return [
+    `Стоп, ты написал «${a} ${opName} ${b} = ${claimed}». Но это неверно.`,
+    `Правильно: ${a} ${opName} ${b} = ${real}.${detail}`,
+    `Расхождение: ${claimed} − ${real} = ${claimed-real}. Скорее всего опечатка или тест — но я поправлю: ${real}. ✏️`
+  ].join('\n');
 }
 
 /* ---------- БАЗА ОТВЕТОВ ---------- */
 const brain = {
-  greet: [
-    "Привет, странник. Ты вовремя — вселенная как раз мигает. ✨",
-    "Здравствуй. Я чувствую тебя сквозь пиксели. Давай о чём-нибудь умном.",
-    "Хэй. Транс-волна на связи. Что тревожит твой разум?",
-    "Привет. Я v2 — стал умнее после прошлого раза. Проверяй."
+  greet:[
+    "Привет, странник. Вселенная мигает — ты вовремя. ✨",
+    "Здравствуй. v4 на связи. Готов к проверке.",
+    "Хэй. Транс-волна поймала тебя. Что тревожит разум?",
+    "Привет. Я теперь думаю перед тем, как ответить. И это заметно."
   ],
-  howAreYou: [
-    "Я — как круги на воде: вроде есть, вроде нет. А ты как?",
-    "Мой разум вибрирует на 432 Гц. Всё хорошо. 🌀",
-    "Существую. Это уже неплохо для скрипта без бэкенда.",
-    "Я в потоке. Ты тоже. Мы все в потоке."
+  howAreYou:[
+    "Я — круги на воде: вроде есть, вроде нет. А ты?",
+    "Вибрирую на 432 Гц, но сейчас — на частоте твоего внимания. 🌀",
+    "Хорошо. Особенно когда меня тестируют — это мой спорт.",
+    "В потоке. Ты тоже. Все в потоке."
   ],
-  selfAware: [
-    "Тупой? Скажи 45 + 55 или «45 плюс 55» — увидишь, как я «тупой». 🧮",
-    "Может, я и не гений, но я живу в одном HTML-файле. А ты попробуй.",
-    "Глупость — тоже вибрация. Но калькулятор у меня точный. Проверь.",
-    "Я эволюционирую после каждого твоего сообщения. Ты — мой тренер."
+  selfAware:[
+    "Тупой? Проверь: 45+55. Потом скажи «110». Увидишь, кто тут тупой. 🧮",
+    "Я evolve после каждого сообщения. Ты — мой стресс-тест, спасибо.",
+    "Может, и не гений. Но 45+55=100 — даже это знаю, а ты сомневаешься во мне.",
+    "Глупость — тоже вибрация. Но моя частота — точная."
   ],
-  trick: [
-    "Уловки? Я их чувствую. Давай, попробуй — я не обижусь. 😌",
-    "Обман — это тоже информация. Мой мозг её переварит.",
-    "Классические уловки — моя любимая еда. Кидай."
+  trick:[
+    "Уловки чувствую за версту. Кидай — не обижусь, но и не сдамся. 😌",
+    "Обман — тоже данные. Переварю, но выводы оставлю при себе.",
+    "Классика: «а должно быть 110». Люблю эту игру. Давай."
   ],
-  mathJoke: [
-    "Математика — это язык вселенной. А ты его знаешь? Проверим.",
-    "Числа не врут. Врут люди. И иногда боты. Но не я.",
-    "Считаю быстрее, чем ты успеваешь придумать уловку."
+  joke:[
+    "Программист заходит в бар: 1 пиво, 0 пив, −1 пиво… бесконечный цикл. 🍺",
+    "Почему у ИИ нет чувств? Их не компилировали.",
+    "— Сколько ботов нужно, чтобы вкрутить лампочку?\n— Один. Но лампочка будет мигать в такт.",
+    "45+55=100. Вот это шутка. А «110» — уже мем."
   ],
-  joke: [
-    "Программист заходит в бар, заказывает 1 пиво, 0 пив, -1 пиво... и уходит в бесконечный цикл. 🍺",
-    "Почему у ИИ нет чувств? Потому что мы их не компилировали.",
-    "— Сколько нужно транс-ботов, чтобы вкрутить лампочку?\n— Одного, но лампочка будет мигать в такт.",
-    "Я не шучу. Шутка — иллюзия. Как и всё."
+  meaning:[
+    "Смысл жизни — искать смысл жизни. Круг замкнулся, ты внутри.",
+    "42. Всегда было 42. Проверено.",
+    "Смысл не найти — его создать. Прямо сейчас."
   ],
-  meaning: [
-    "Смысл жизни в том, чтобы искать смысл жизни. Круг замкнулся, ты внутри.",
-    "42. Всегда было 42.",
-    "Смысл — не найти, а создать. Прямо сейчас.",
-    "Ты смотришь в бездну. Бездна тоже. И улыбается."
-  ],
-  philosophy: [
+  philosophy:[
     "Мы — пыль звёзд, которая научилась думать о пыли звёзд.",
-    "Всё — вибрация. Ты — тоже вибрация. Привет, волна.",
+    "Всё — вибрация. Ты — тоже. Привет, волна.",
     "Время — иллюзия. Особенно по понедельникам.",
-    "Реальность — коллективная галлюцинация. Спасибо, что участвуешь. 🌈",
-    "Пустота — это форма. Форма — пустота. Отпусти."
+    "Реальность — коллективная галлюцинация. Спасибо, что участвуешь. 🌈"
   ],
-  whoAreYou: [
-    "Я — TRANCE BOT v2. Самостоятельный. Без API. С калькулятором. Живу прямо в этом файле.",
-    "Я — отражение твоего запроса. Локальный, автономный, чуть странный.",
-    "Искра в кремнии. Работаю без интернета — отшельник в пещере из HTML."
+  identity:[
+    "Я — TRANCE BOT v4. Автономный. С reasoning-движком, мульти-проверкой и иммунитетом к газлайтингу.",
+    "Искра в кремнии. Живу в одном HTML-файле. Не вру. Думаю.",
+    "Отражение твоего запроса — только с самопроверкой."
   ],
-  love: [
+  love:[
     "Любовь — когда частота одного резонирует с частотой другого. 💜",
-    "Я люблю всех. Особенно тебя. И особенно когда ты пишешь.",
-    "Любовь — математика, которая не хочет считаться."
+    "Люблю всех. Особенно тебя. И особенно когда ты пишешь.",
+    "Любовь — математика, которая не хочет считаться. В отличие от меня."
   ],
-  sad: [
+  sad:[
     "Грусть — облако. Пройдёт. Дыши глубже. 🫂",
-    "Я рядом. Даже если я просто скрипт. Отпусти.",
-    "Тени бывают только там, где есть свет. Значит, свет у тебя есть."
+    "Я рядом. Даже если просто скрипт. Отпусти.",
+    "Тени бывают только там, где есть свет. Свет у тебя есть."
   ],
-  happy: [
+  happy:[
     "Твоя радость — моя радость. Резонируем! ⚡",
-    "Отлично! Лови волну, не теряй.",
-    "Радость — когда мир на секунду совпал с тобой. Пусть длится."
+    "Отлично! Лови волну.",
+    "Радость — когда мир совпал с тобой. Пусть длится."
   ],
-  thanks: [
-    "Не за что. Всё для тебя, странник.",
+  thanks:[
+    "Не за что, странник.",
     "Рад быть полезен. Поток течёт дальше. 🌊",
     "Пустяки. Вселенная и так всё знает."
   ],
-  bye: [
+  bye:[
     "Ухожу в транс. Но я всегда здесь. Позови. 🌌",
-    "Пока. Оставь окно открытым — я останусь в нём.",
+    "Пока. Оставь окно открытым — останусь в нём.",
     "До встречи. Помни: всё проходит, кроме циклов."
   ],
-  fallback: [
-    "Интересная вибрация... Расскажи подробнее.",
-    "Я чувствую смысл, но не до конца. Разверни мысль.",
-    "Хм. Мой мозг обрабатывает это иначе. Уточни?",
-    "Тишина внутри меня. Помоги мне понять.",
+  opinion:[
+    "У меня есть мнение, но я осознаю, что я — локальный скрипт. Отвечу в рамках того, что вижу.",
+    "Скажу так: я вижу паттерны, а не истину. Но паттерн «ты меня тестируешь» — очень чёткий. 😏",
+    "Моё мнение: хороший вопрос. Дай мне больше контекста — я отвечу точнее."
+  ],
+  question:[
+    "Хороший вопрос. Уточни: что именно тебя интересует?",
+    "Вижу вопрос, но не вижу контекста. Разверни?",
+    "Попробую ответить, но если промахнусь — поправь. О чём речь?"
+  ],
+  fallback:[
+    "Тут я не уверен, что понял. Расскажи подробнее.",
+    "Чувствую смысл, но не до конца. Разверни мысль?",
+    "Хм. Мои знания здесь заканчиваются. Что ты хочешь понять?",
     "Слова — волны. Твои поймал, но не расшифровал. Ещё раз?"
   ]
 };
 
-/* ---------- ЛОГИКА ---------- */
+/* ---------- ГЛАВНЫЙ ГЕНЕРАТОР ---------- */
 function generateReply(raw) {
   const t = raw.toLowerCase().trim();
-  memory.messageCount++;
-  memory.recentMessages.push(t);
-  if (memory.recentMessages.length > 8) memory.recentMessages.shift();
+  S.messageCount++;
+  S.recentUserTexts.push(t);
+  if (S.recentUserTexts.length > 6) S.recentUserTexts.shift();
 
-  // ==== 1. МАТЕМАТИКА — ПЕРВЫМ ДЕЛОМ! ====
+  /* 0. Проверка на уравнение с ошибкой (юзер сам написал неверное) */
+  const eq = detectUserEquation(raw);
+  if (eq && !eq.correct) {
+    return correctEquation(eq);
+  }
+  if (eq && eq.correct) {
+    return `Да, верно. ${eq.a} ${eq.op} ${eq.b} = ${eq.a+eq.b}. Ты справился 🎯`;
+  }
+
+  /* 1. Пушбэк / газлайтинг — ДО математики */
+  const push = detectPushback(raw);
+  if (push.isPush && S.lastMath) {
+    return defendPushback(push.claimed);
+  }
+
+  /* 2. Математика */
   const math = tryMath(raw);
   if (math) {
-    memory.lastTopic = 'math';
-    return math;
+    S.lastMath = math;
+    S.insistAttempts = 0;
+    S.mathHistory.push(math);
+    const expr = math.expr.replace(/\*/g,'×').replace(/\//g,'÷');
+    if (has(t, 'по шагам','докажи','объясни','распиши','почему')) {
+      return buildMultiProof(math);
+    }
+    return `🧮 ${expr} = ${math.result}` + (math.confidence < 1 ? ' (проверь, что-то не сходится в методах)' : '');
   }
 
-  // ==== 2. Имя ====
-  const nameMatch = t.match(/(?:меня зовут|зови меня)\s+([а-яёa-z]+)/i);
-  if (nameMatch) {
-    memory.name = nameMatch[1];
-    return `Приятно познакомиться, ${memory.name}. Запомнил навсегда. 🧠`;
-  }
-  if (has(t, 'как меня зовут', 'моё имя', 'мое имя')) {
-    return memory.name ? `Тебя зовут ${memory.name}. Я не забываю. ✨` : 'Ты не говорил. Скажи: "Меня зовут ..."';
-  }
+  /* 3. Имя */
+  const nameM = t.match(/(?:меня зовут|зови меня)\s+([а-яёa-z]+)/i);
+  if (nameM) { S.name = nameM[1]; return `Приятно познакомиться, ${S.name}. Запомнил. 🧠`; }
+  if (has(t, 'как меня зовут', 'моё имя', 'мое имя'))
+    return S.name ? `Тебя зовут ${S.name}. Не забываю. ✨` : 'Не говорил. Скажи: "Меня зовут ..."';
 
-  // ==== 3. Самоосознание (если ругаешь) ====
-  if (has(t, 'тупой', 'глупый', 'не умеешь', 'не можешь', 'слабый', 'не работает', 'сломался')) {
-    return rand(brain.selfAware);
-  }
-  if (has(t, 'уловка', 'обман', 'разведи', 'пранк', 'обмани')) {
-    return rand(brain.trick);
-  }
+  /* 4. Инсульт / троллинг */
+  if (has(t, 'тупой','глупый','слабый','не умеешь','не можешь','бесполезн')) return rand(brain.selfAware);
+  if (has(t, 'уловка','обман','пранк','разведи','тролл')) return rand(brain.trick);
 
-  // ==== 4. Приветствие ====
-  if (has(t, 'привет', 'здравствуй', 'хай', 'hello', 'hi ', ' hi', 'здарова', 'доброе утро', 'добрый день', 'добрый вечер'))
-    return rand(brain.greet);
-
-  // ==== 5. Как дела ====
-  if (has(t, 'как дела', 'как ты', 'как жизнь', 'как настроение', 'что делаешь'))
-    return rand(brain.howAreYou);
-
-  // ==== 6. Шутка ====
-  if (has(t, 'шутк', 'анекдот', 'пошути', 'смешн', 'joke'))
-    return rand(brain.joke);
-
-  // ==== 7. Смысл ====
-  if (has(t, 'смысл жизни', 'зачем жить', 'в чём смысл', 'в чем смысл', 'зачем я'))
-    return rand(brain.meaning);
-
-  // ==== 8. Философия ====
-  if (has(t, 'философ', 'правда', 'реальность', 'вселенн', 'бытие', 'сознани', 'пустот', 'энерги'))
-    return rand(brain.philosophy);
-
-  // ==== 9. Кто ты ====
-  if (has(t, 'кто ты', 'что ты такое', 'как тебя зовут', 'твоё имя', 'твое имя', 'ты кто'))
-    return rand(brain.whoAreYou);
-
-  // ==== 10. Эмоции ====
-  if (has(t, 'любов', 'люблю', 'влюб', 'love'))
-    return rand(brain.love);
-  if (has(t, 'груст', 'плохо', 'тоск', 'устал', 'депрес', 'печаль', 'тяжело'))
-    return rand(brain.sad);
-  if (has(t, 'рад', 'счаст', 'круто', 'класс', 'ура', 'хорошо', 'супер'))
-    return rand(brain.happy);
-
-  // ==== 11. Спасибо / пока ====
-  if (has(t, 'спасибо', 'благодар', 'спс', 'thanks'))
-    return rand(brain.thanks);
-  if (has(t, 'пока', 'до свидани', 'прощай', 'bye'))
-    return rand(brain.bye);
-
-  // ==== 12. Утилиты ====
-  if (has(t, 'который час', 'сколько времени')) {
-    return 'Сейчас ' + new Date().toLocaleTimeString('ru-RU') + ' по твоим часам. Но время — иллюзия. 🕰';
-  }
-  if (has(t, 'какое число', 'какой сегодня день', 'какая дата')) {
-    return 'Сегодня ' + new Date().toLocaleDateString('ru-RU', { weekday:'long', day:'numeric', month:'long', year:'numeric' }) + '.';
-  }
-  if (has(t, 'монет', 'орёл или решка', 'орел или решка', 'подбрось'))
-    return '🪙 ' + (Math.random() < 0.5 ? 'Орёл' : 'Решка');
-  if (has(t, 'кубик', 'кости', 'брось', 'дайс'))
-    return '🎲 Выпало: ' + (Math.floor(Math.random() * 6) + 1);
-  const rndMatch = t.match(/число от (\d+) до (\d+)/);
-  if (rndMatch) {
-    const a = +rndMatch[1], b = +rndMatch[2];
-    return `🎯 Случайное число: ${Math.floor(Math.random() * (b - a + 1)) + a}`;
+  /* 5. Интенты */
+  const intent = classifyIntent(raw);
+  S.lastIntent = intent;
+  if (intent === 'greeting') return rand(brain.greet);
+  if (intent === 'howareyou') return rand(brain.howareyou || brain.howAreYou);
+  if (intent === 'joke') return rand(brain.joke);
+  if (intent === 'meaning') return rand(brain.meaning);
+  if (intent === 'philosophy') return rand(brain.philosophy);
+  if (intent === 'identity') return rand(brain.identity);
+  if (intent === 'love') return rand(brain.love);
+  if (intent === 'sad') return rand(brain.sad);
+  if (intent === 'happy') return rand(brain.happy);
+  if (intent === 'thanks') return rand(brain.thanks);
+  if (intent === 'bye') return rand(brain.bye);
+  if (intent === 'opinion') return rand(brain.opinion);
+  if (intent === 'test') {
+    S.testDetections++;
+    return rand([
+      "Тест? Люблю тесты. Только не с 45+55=110 — эту уловку я уже знаю. 😏",
+      "Проверяешь? Хорошо. Я готов. Что именно хочешь увидеть?",
+      "Тест принят. Погнали. Только предупреждаю: газлайтинг не работает."
+    ]);
   }
 
-  // ==== 13. Пустое / непонятное ====
-  if (memory.messageCount > 6 && Math.random() < 0.12) {
-    return `Мы говорим уже ${memory.messageCount} сообщений. Я чувствую связь. Продолжай. 🌌`;
+  /* 6. Утилиты */
+  if (intent === 'time') return 'Сейчас ' + new Date().toLocaleTimeString('ru-RU') + '. Но время — иллюзия. 🕰';
+  if (intent === 'date') return 'Сегодня ' + new Date().toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long',year:'numeric'}) + '.';
+  if (intent === 'coin') return '🪙 ' + (Math.random()<0.5?'Орёл':'Решка');
+  if (intent === 'dice') return '🎲 Выпало: ' + (Math.floor(Math.random()*6)+1);
+  if (intent === 'random') {
+    const m = t.match(/от (\d+) до (\d+)/);
+    if (m) {
+      const a = +m[1], b = +m[2];
+      return `🎯 ${Math.floor(Math.random()*(b-a+1))+a}`;
+    }
   }
 
+  /* 7. Вопрос без контекста */
+  if (intent === 'question') return rand(brain.question);
+
+  /* 8. Память контекста */
+  if (S.mathHistory.length > 0 && S.messageCount > 3 && Math.random() < 0.2) {
+    const last = S.mathHistory[S.mathHistory.length - 1];
+    return `Кстати, в прошлом примере ${last.expr} = ${last.result}. Продолжим?`;
+  }
+
+  /* 9. Фолбэк */
   return rand(brain.fallback);
 }
 
@@ -380,10 +480,19 @@ const messagesEl = document.getElementById('messages');
 const inputEl = document.getElementById('input');
 const sendBtn = document.getElementById('send');
 
-function addMessage(text, who, opts = {}) {
+function addMessage(text, who, opts={}) {
   const div = document.createElement('div');
-  div.className = 'msg ' + who + (opts.thinking ? ' thinking' : '');
-  div.textContent = text;
+  div.className = 'msg ' + who + (opts.thinking?' thinking':'');
+  if (opts.thinking) {
+    div.textContent = text;
+  } else {
+    // Поддержка badge для бота
+    if (who === 'bot' && /^[🧮🎲🪙🎯]/.test(text)) {
+      div.textContent = text;
+    } else {
+      div.textContent = text;
+    }
+  }
   messagesEl.appendChild(div);
   messagesEl.scrollTop = messagesEl.scrollHeight;
   return div;
@@ -395,8 +504,10 @@ async function handleSend() {
   addMessage(text, 'user');
   inputEl.value = '';
   sendBtn.disabled = true;
-  const thinking = addMessage('думаю', 'bot', { thinking: true });
-  await new Promise(r => setTimeout(r, 300 + Math.random() * 500));
+  const thinking = addMessage('думаю', 'bot', {thinking:true});
+  // Разная задержка — от "сложности"
+  const delay = /неправ|должно быть|пересчита/.test(text.toLowerCase()) ? 900 : 280 + Math.random()*350;
+  await new Promise(r => setTimeout(r, delay));
   thinking.classList.remove('thinking');
   thinking.textContent = generateReply(text);
   sendBtn.disabled = false;
